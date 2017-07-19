@@ -9,33 +9,58 @@
 #import "MovieListViewController.h"
 #import "MovieTableViewCell.h"
 
+@import FirebaseDatabase;
+
 
 @interface MovieListViewController () <UITableViewDataSource, UITableViewDelegate>
 
+@property (strong, nonatomic) FIRDatabaseReference *ref;
+@property (strong, nonatomic) NSArray *data;
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
+
 @end
+
 
 @implementation MovieListViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    [self loadData];
 }
+
+-(void)loadData
+{
+    self.ref = [[[FIRDatabase database] reference] child:@"movies"];
+    [self.ref observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
+        NSLog(@"%@",snapshot.value);
+        self.data = snapshot.value;
+        [self.tableView reloadData];
+    } withCancelBlock:^(NSError * _Nonnull error) {
+        NSLog(@"%@", error.localizedDescription);
+    }];
+}
+
 
 #pragma mark -
 #pragma UITableViewDataSource methods
-    
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 5;
+    NSLog(@"%lu",(unsigned long)[self.data count]);
+    return [self.data count];
 }
     
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     MovieTableViewCell *cell =[tableView dequeueReusableCellWithIdentifier:@"cell"];
-    
-    cell.labelRank.text = @"1";
-    cell.labelMovieName.text = @"猩球崛起：終極決戰";
-    cell.labelImdbScore.text = @"8.1";
-    cell.imageViewPoster.image = [UIImage imageNamed:@"poster1.jpg"];
+ 
+    NSDictionary *dic = [self.data objectAtIndex:indexPath.row];
+    if (dic != (id)[NSNull null]) {
+        cell.labelRank.text = [[dic objectForKey:@"rank"] stringValue];
+        cell.labelMovieName.text = [dic objectForKey:@"movie_name"];
+        cell.labelImdbScore.text = [[dic objectForKey:@"imdb_score"] stringValue];
+    }
     
     return cell;
 }
