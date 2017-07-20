@@ -33,8 +33,6 @@ iOS UITableView 教學用範例
     - tableView:commitEditingStyle:forRowAtIndexPath
     
 - NewsListViewController
-  - 練習從本地檔案讀取資料
-    - 讀取csv檔
-    - 讀取plist檔
-    
+  - 練習從遠端讀取資料
+    - 從Firebase讀取資料
 
